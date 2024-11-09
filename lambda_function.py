@@ -27,7 +27,7 @@ def lambda_handler(event, context):
                 'statusCode': 400,
                 'body': json.dumps({'error': 'Invalid operation'})
             }
-
+            
         return {
             'headers': {
             'Access-Control-Allow-Headers': 'Content-Type',
