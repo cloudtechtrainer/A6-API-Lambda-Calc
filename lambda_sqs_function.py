@@ -1,4 +1,11 @@
 import json
+import boto3
+
+# Initialize SQS client
+sqs = boto3.client('sqs')
+
+# Replace with your SQS queue URL
+RESULT_QUEUE_URL = "https://sqs.ap-south-1.amazonaws.com/277707115666/calcsqs"
 
 def lambda_handler(event, context):
     print("Lambda triggered by SQS")
@@ -32,12 +39,22 @@ def lambda_handler(event, context):
                 print("Invalid operation received: ", operation)
                 continue
             
-            # Log the successful processing
-            print(f"Processed result: {result}")
+            # Send the result to the result SQS queue
+            message = {
+                "operation": operation,
+                "num1": num1,
+                "num2": num2,
+                "result": result
+            }
+            response = sqs.send_message(
+                QueueUrl=RESULT_QUEUE_URL,
+                MessageBody=json.dumps(message)
+            )
+            print(f"Result sent to SQS. Message ID: {response['MessageId']}")
         
         return {
             'statusCode': 200,
-            'body': json.dumps({'message': 'Messages processed successfully'})
+            'body': json.dumps({'message': 'Messages processed successfully and results sent to SQS'})
         }
     except Exception as e:
         print("Error processing messages:", str(e))
